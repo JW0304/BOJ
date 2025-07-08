@@ -39,14 +39,10 @@ for i in range(T):
                     if rounds[r][c] != 0:
                         if rounds[r][c] == rounds[dr][dc]:
                             adj[r][c], adj[dr][dc] = 1, 1
-                        
-    # print(adj)
     
     adj_sum = sum(map(sum, adj))
     rounds_sum = sum(map(sum, rounds))
     rounds_num = 0
-    
-    # print(adj_sum, rounds_sum, rounds)
     
     # 수가 남아있지 않은 경우
     if rounds_sum == 0:
@@ -62,17 +58,15 @@ for i in range(T):
                         rounds_num += 1
             avg = rounds_sum / rounds_num
             
-            # print(rounds)
-            
             for r in range(N):
                 for c in range(M):
-                    if rounds[r][c] != 0:
-                        if rounds[r][c] < avg:
-                            rounds[r][c] += 1
-                        elif rounds[r][c] > avg:
-                            rounds[r][c] -= 1
-                        
-            # print(rounds)
+                    if rounds[r][c] == 0:
+                        continue
+                    
+                    if rounds[r][c] < avg:
+                        rounds[r][c] += 1
+                    elif rounds[r][c] > avg:
+                        rounds[r][c] -= 1
                         
         # 인접한 같은 수가 있을 때:
         else:
@@ -80,7 +74,6 @@ for i in range(T):
                 for c in range(M):
                     if adj[r][c] == 1:
                         rounds[r][c] = 0
-            # print(adj, rounds)
                             
 result = sum(map(sum, rounds))    
 print(result)
