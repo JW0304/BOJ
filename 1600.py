@@ -2,70 +2,172 @@ import sys
 input = sys.stdin.readline
 
 import heapq
+from collections import deque
+
+def knight(board, W, H, w, h, dw, dh):
+    # print("---def knight start---")
+    global now, prefix, result
+    
+    # K의 횟수만큼 나이트로 이동 가능
+    for ki in range(1, K + 1):
+        
+        # 갱신
+        next = deque()
+        
+        # print("ki:", ki)
+        
+        # 현재 턴에서 나이트로 이동 가능한 지점들
+        while len(now) != 0:
+            w, h = now.popleft()
+            
+            # print("w, h:", w, h)
+            
+            # 도착한 경우, 결과에 이동횟수 추가
+            if (w, h) == (H-1, W-1):
+                result.append(prefix[h][w] - 1) # 여기도 가로세로 잘못 적음, 왜 -1?
+                return
+            
+            # 나이트 이동: 상하+좌우, 좌우+상하 방향
+            for i in range(4):
+                kh = h + dh[i]
+                kw_l = w - dw[i]
+                kw_r = w + dw[i]
+                    
+                # 장애물이 아니고 미방문이면 ki 더하기
+                if 0 <= kh < H and 0 <= kw_l < W:
+                    if board[kh][kw_l] != 1 and prefix[kh][kw_l] == 0:
+                        prefix[kh][kw_l] += ki
+                        next.append((kh, kw_l))
+                        # 도착한 값이면 result에 추가
+                        if (kh, kw_l) == (H-1, W-1):
+                            result.append(prefix[kh][kw_l])
+                
+                if 0 <= kh < H and 0 <= kw_r < W:
+                    if board[kh][kw_r] != 1 and prefix[kh][kw_r] == 0:
+                        prefix[kh][kw_r] += ki
+                        next.append((kh, kw_r))
+                        # 도착한 값이면 result에 추가
+                        if (kh, kw_r) == (H-1, W-1):
+                            result.append(prefix[kh][kw_r])
+                        
+            # print("prefix:", prefix)
+            # print("next:", next)
+                        
+        # 다음 턴으로 이동
+        now = next
+                
+        # print("result:", result)
+        # print("now:", now)
+        
+    return result, now
+
+def pawn(board, W, H, w, h, dw2, dh2):
+    # print()
+    # print("---def pawn start---")
+    global now, prefix, result
+    
+    # 현재 턴에서 폰으로 이동 가능한 지점들    
+    while now != []:
+        w, h = now.pop(0)
+        
+        # print("w, h:", w, h)
+        
+        BFS_now = deque([(w, h)])
+        BFS_next = deque()
+        pi = prefix[h][w]  # 이전에 이동한 거리에서 시작해야 함
+        
+        while BFS_now:
+            nw, nh = BFS_now.popleft()
+            
+            # 도착한 경우, 결과에 이동횟수 추가
+            if (nw, nh) == (H-1, W-1):
+                result.append(prefix[nw][nh])
+                break
+        
+            # 폰 이동: 상하좌우
+            for i in range(4):
+                pw = nw - dw2[i]
+                ph = nh + dh2[i]
+                    
+                # 장애물이 아니고, 미방문이거나 값이 더 작으면
+                if 0 <= pw < W and 0 <= ph < H:
+                    if board[ph][pw] != 1 and (prefix[ph][pw] == 0 or
+                                               pi + 1 < prefix[ph][pw]):
+                        prefix[ph][pw] = pi + 1
+                        BFS_next.append((pw, ph)) # 좌표 주의! 가로세로 반대로 적었음
+                        
+                        # 도착한 값이면 result에 추가
+                        if (pw, ph) == (W-1, H-1):
+                            result.append(prefix[ph][pw])
+                            
+            # BFS에서 다음 턴으로 이동
+            if BFS_next != []:
+                pi += 1
+                BFS_now = BFS_next
+                BFS_next = deque()
+                
+        # print("prefix:", prefix)
+        # print("next:", next)
+                    
+    # 다음 턴으로 이동
+    now = next
+            
+    # print("result:", result)
+    # print("now:", now)
+
 
 K = int(input())
 W, H = map(int, input().split())
 
-mat = [list(map(int, input().split())) for _ in range(H)]
-
+board = [list(map(int, input().split())) for _ in range(H)]
 prefix = [[0] * W for _ in range(H)]
-
-hrow = [-2, -1, 1, 2]
-hcol = [1, 2, 2, 1]
+prefix[0][0] = 1  # 시작점 방문 처리
  
-# 비지 않았으면 하나하나 빼서 출발점으로 지정
-temp = []
+# 현재 턴에 이동할 곳, 다음 턴에 이동할 곳
+now = [(0, 0)]
 next = []
-r, c = 0
 
-# K만큼 나이트 이동(0, 1, 2, ..., K)
-for ki in range(K):
+w, h = 0, 0
+result = []
 
-    while len(temp) != 0:
-        r, c = heapq.heappop(temp)
-        
-        for i in range(4):
-            hr = r + hrow[i]
-            hc_l = c - hcol[i]
-            hc_r = c + hcol[i]
-                
-            # 나이트 이동: 왼쪽, 오른쪽
-            if 0 <= hr < H and 0 <= hc_l < W:
-                if mat[hr][hc_l] == 0:
-                    prefix[hr][hc_l] += 1
-                    next.append((hr, hc_l))
-            
-            if 0 <= hr < H and 0 <= hc_r < W:
-                if mat[hr][hc_r] == 0:
-                    prefix[hr][hc_r] += 1
-                    next.append((hr, hc_r))
-            
-            # 다음에 갈 수 있는 곳이 없으면 -1 출력하고 끝
-            if next != []:
-                break
-            else:
-                temp = next
-                
-            # 델타 이동
-            for r in range(H):
-                for c in range(W):
-                    if 
-        
-# 나머지는 델타 이동, 델타 이동한 값이 더 작을때만 갱신
-# 해당값 = 왼쪽값 + 위쪽값 - 왼쪽위값
-for mat[hr][hc_l] + mat[hr][hc_r] -mat[j][]
+# 나이트로 이동 가능한 곳들
+dh = [-2, -1, 1, 2]
+dw = [1, 2, 2, 1]
+
+# 델타 탐색 순서: 오른쪽, 아래, 위, 왼쪽
+dh2 = [0, 1, -1, 0]
+dw2 = [1, 0, 0, -1]
+
+# 나이트 이동
+knight(board, W, H, w, h, dw, dh)
+
+# print("result, now:", result, now)
+
+# 도착 X, 이동 가능 O
+if result == [] and now != []:
+    # 폰 이동
+    pawn(board, W, H, w, h, dw2, dh2)
     
+print(prefix)
+    
+# 최소 이동횟수 출력
+if result != []:
+    print(min(result))
+else:
+    print(-1)
 
 '''
 문제 풀이:
-원숭이 r, c일 때
+말이 되고싶은 원숭이,
+나이트가 되고싶은 폰
 
-말(K번): 윗줄에서부터
+폰 r, c일 때
+나이트(K번): 윗줄에서부터
 (r-2, c-1), (r-2, c+1)
 (r-1, c-2), (r-1, c+2)
 (r+1, c-2), (r+1, c+2)
 (r+2, c-1), (r+2, c+1)
-원숭이(K번 이후): 델타로 이동
+폰(K번 이후): 델타로 이동
 
 매트릭스:
 0 0 0 0
