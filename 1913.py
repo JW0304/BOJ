@@ -12,47 +12,46 @@ r, c = 0, 0
 # 델타 반시계, 하우상좌
 dr = [1, 0, -1, 0]
 dc = [0, 1, 0, -1]
-# 델타의 i값
-ir, ic = 0, 0
+# 델타의 인덱스
+di = 0
 
 # K값 찾기
 kr, kc = 0, 0
 
 # 함수 만들기
 def make_snail(N, K):
-    global M, r, c, ir, ic, kr, kc
+    global M, r, c, di, kr, kc
     
     while M >= 1:
         # 범위 안이고 값이 0일 때
         if (0 <= r < N and 0 <= c < N
             and mat[r][c] == 0):
             mat[r][c] = M
-            # print("orig", r, c, ir, ic, M)
+            # print("orig", r, c, di, M)
             
             # K값 찾기 (인덱스 + 1)
             if mat[r][c] == K:
                 kr, kc = r + 1, c + 1
             
             # 다음 칸으로 가기
-            r = r + dr[ir]
-            c = c + dc[ic]
+            r = r + dr[di]
+            c = c + dc[di]
             M -= 1
         
         # 범위 밖이거나 값이 0이 아닐 때
         else:
             # 한칸 전으로 돌아가기
-            r = r - dr[ir]
-            c = c - dc[ic]
+            r = r - dr[di]
+            c = c - dc[di]
             
             # 방향전환: 원형으로 돌아가며 i값을 더함 
             # 길이 = 4, 나머지 = 0, 1, 2, 3
-            ir = (ir + 1) % 4
-            ic = (ic + 1) % 4
+            di = (di + 1) % 4
 
             # 다음 칸으로 가기
-            r = r + dr[ir]
-            c = c + dc[ic]
-            # print("else", r, c, ir, ic, M)
+            r = r + dr[di]
+            c = c + dc[di]
+            # print("else", r, c, di, M)
 
 # 함수 실행
 make_snail(N, K)
@@ -73,6 +72,10 @@ print(kr, kc)
 범위에서 벗어나거나 행렬값이 0이 아니면...
 = 범위 안이거나 채워진 값이 0일 때는
 같은 ri[i], ci[i]값을 가지면 된다.
+
+델타 인덱스:
+델타의 인덱스값은 r, c 나눠서 쓸 필요 없이
+하나로 쓰면 된다.
 '''
 
 '''
